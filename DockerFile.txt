@@ -1,0 +1,32 @@
+FROM python:3.11-slim
+
+# Устанавливаем Chromium и его зависимости
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-driver \
+    libnss3 \
+    libxss1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libgtk-3-0 \
+    fonts-liberation \
+    libgbm1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Переменная окружения — путь к браузеру
+ENV BROWSER_PATH=/usr/bin/chromium
+
+# Рабочая директория внутри контейнера
+WORKDIR /app
+
+# Копируем и устанавливаем зависимости
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем все скрипты
+COPY parser.py .
+COPY predictor.py .
+COPY stats.py .
+
+# Запускаем парсер
+CMD ["python", "-u", "parser.py"]

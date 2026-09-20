@@ -1,0 +1,7 @@
+services:
+  - type: worker
+    name: bulldrop-bot
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: false
