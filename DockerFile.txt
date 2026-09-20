@@ -1,6 +1,6 @@
 FROM python:3.11-slim
 
-# Устанавливаем Chromium и его зависимости
+# Устанавливаем Chromium и зависимости
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-driver \
@@ -13,20 +13,23 @@ RUN apt-get update && apt-get install -y \
     libgbm1 \
     && rm -rf /var/lib/apt/lists/*
 
-# Переменная окружения — путь к браузеру
+# Hugging Face Spaces требует пользователя с UID 1000
+RUN useradd -m -u 1000 user
+USER user
+
+# Переменная окружения для пути к браузеру
 ENV BROWSER_PATH=/usr/bin/chromium
 
-# Рабочая директория внутри контейнера
-WORKDIR /app
+WORKDIR /home/user/app
 
-# Копируем и устанавливаем зависимости
-COPY requirements.txt .
+# Копируем зависимости и устанавливаем
+COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копируем все скрипты
-COPY parser.py .
-COPY predictor.py .
-COPY stats.py .
+# Копируем скрипты
+COPY --chown=user parser.py .
+COPY --chown=user predictor.py .
+COPY --chown=user stats.py .
 
 # Запускаем парсер
 CMD ["python", "-u", "parser.py"]
